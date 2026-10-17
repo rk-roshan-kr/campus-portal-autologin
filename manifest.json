@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Campus Portal Auto-Login",
+  "version": "2.1.0",
+  "description": "Automated hands-free authentication for campus captive portals with background watchdog, anti-spam protection, and pause controls.",
+  "author": "Roshan Kumar Gupta (@rk-roshan-kr)",
+  "homepage_url": "https://github.com/rk-roshan-kr/campus-portal-autologin",
+  "permissions": ["storage", "alarms", "tabs"],
+  "host_permissions": [
+    "http://172.16.2.1/*",
+    "http://172.20.64.1/*",
+    "http://connectivitycheck.gstatic.com/*"
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Campus Portal Auto-Login",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://172.16.2.1/*",
+        "http://172.20.64.1/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}

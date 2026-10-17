@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Campus Portal Auto-Login</title>
+  <style>
+    :root {
+      --bg-main: #0B0F19;
+      --bg-card: #151D2F;
+      --bg-input: #1C263D;
+      --border-subtle: #25334E;
+      --border-focus: #6366F1;
+      --text-main: #F1F5F9;
+      --text-muted: #94A3B8;
+      --accent-green: #10B981;
+      --accent-green-bg: rgba(16, 185, 129, 0.12);
+      --accent-rose: #F43F5E;
+      --accent-rose-bg: rgba(244, 63, 94, 0.12);
+      --accent-blue: #6366F1;
+      --accent-cyan: #06B6D4;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 320px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+      background: var(--bg-main);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #4F46E5, #06B6D4);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+    }
+    .brand-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: white;
+    }
+    .brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      color: var(--text-main);
+    }
+    .version-tag {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg-input);
+      padding: 2px 6px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Master Switch Card */
+    .switch-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      transition: all 0.2s ease;
+    }
+    .switch-card:hover {
+      border-color: #334155;
+    }
+    .switch-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .switch-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .switch-sublabel {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+      display: inline-block;
+    }
+    .pulse-dot.paused {
+      background: var(--accent-rose);
+      box-shadow: 0 0 8px var(--accent-rose);
+    }
+
+    /* iOS Style Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      cursor: pointer;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #334155;
+      transition: .25s ease;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .25s ease;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    input:checked + .slider {
+      background: linear-gradient(135deg, #10B981, #059669);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    }
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Form Container */
+    .form-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .field-group {
+      margin-bottom: 10px;
+    }
+    .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+      display: block;
+    }
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute;
+      left: 10px;
+      width: 14px;
+      height: 14px;
+      fill: #64748B;
+      pointer-events: none;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 9px 10px 9px 32px;
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+    input[type="text"]:focus, input[type="password"]:focus {
+      border-color: var(--border-focus);
+      background: #23304D;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    .eye-btn {
+      position: absolute;
+      right: 8px;
+      background: transparent;
+      border: none;
+      color: #64748B;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 4px;
+    }
+    .eye-btn:hover { color: var(--text-main); }
+    .eye-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+    /* Collapsible Gateway Settings */
+    .collapsible-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-top: 6px;
+      margin-bottom: 6px;
+      padding: 2px 0;
+    }
+    .collapsible-trigger:hover { color: var(--text-main); }
+    .collapsible-content {
+      display: none;
+      margin-top: 6px;
+      margin-bottom: 10px;
+    }
+    .collapsible-content.open { display: block; }
+
+    /* Action Button */
+    .btn-save {
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, #4F46E5, #06B6D4);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-save:hover {
+      box-shadow: 0 6px 16px rgba(79, 70, 229, 0.45);
+      transform: translateY(-1px);
+    }
+    .btn-save:active {
+      transform: translateY(0);
+    }
+
+    /* Alerts */
+    .alert-banner {
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 11px;
+      line-height: 1.4;
+      margin-bottom: 12px;
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+    .alert-error {
+      background: var(--accent-rose-bg);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: #FDA4AF;
+    }
+    .alert-success {
+      background: var(--accent-green-bg);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #6EE7B7;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Footer */
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 11px;
+      color: #64748B;
+    }
+    .author-link {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--text-muted);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.15s ease;
+      font-weight: 500;
+    }
+    .author-link:hover {
+      color: #38BDF8;
+    }
+    .author-link svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+    .github-pill {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      padding: 3px 8px;
+      border-radius: 12px;
+      color: var(--text-muted);
+      font-size: 10px;
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .github-pill:hover {
+      border-color: #475569;
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <div class="brand-title">Campus Auto-Login</div>
+    </div>
+    <span class="version-tag">v2.1</span>
+  </div>
+
+  <!-- Master Active / Pause Switch Card -->
+  <div class="switch-card">
+    <div class="switch-info">
+      <span class="switch-label">Auto-Login Engine</span>
+      <span id="statusSublabel" class="switch-sublabel">
+        <span id="statusDot" class="pulse-dot"></span>
+        <span id="statusText">Active • Monitoring</span>
+      </span>
+    </div>
+    <label class="toggle-switch">
+      <input type="checkbox" id="masterToggle" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <!-- Error / Alert Banner -->
+  <div id="alertBanner" class="alert-banner"></div>
+
+  <!-- Credentials Form Card -->
+  <div class="form-card">
+    <div class="field-group">
+      <label class="field-label" for="username">Username / UID</label>
+      <div class="input-wrapper">
+        <svg class="input-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        <input type="text" id="username" placeholder="e.g. 21BCS..." autocomplete="username">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="password">Password</label>
+      <div class="input-wrapper">
+        <svg class="input-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        <input type="password" id="password" placeholder="••••••••••••" autocomplete="current-password">
+        <button type="button" id="togglePasswordBtn" class="eye-btn" title="Show/Hide Password">
+          <svg id="eyeIcon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="collapsible-trigger" id="gatewayToggle">
+      <span>⚙️ Gateway Settings</span>
+      <span id="gatewayArrow">▼</span>
+    </div>
+
+    <div class="collapsible-content" id="gatewayContent">
+      <label class="field-label" for="portalUrl">Portal URL</label>
+      <div class="input-wrapper">
+        <input type="text" id="portalUrl" placeholder="http://172.16.2.1/" value="http://172.16.2.1/">
+      </div>
+    </div>
+
+    <button type="button" id="saveBtn" class="btn-save">
+      <span>Save Credentials</span>
+    </button>
+  </div>
+
+  <!-- Developer & Community Footer -->
+  <div class="footer">
+    <a id="authorLink" class="author-link" title="Visit Developer GitHub">
+      <svg viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      <span>@rk-roshan-kr</span>
+    </a>
+    <a id="githubRepoLink" class="github-pill" title="View Source on GitHub">
+      <span>★ Star on GitHub</span>
+    </a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
