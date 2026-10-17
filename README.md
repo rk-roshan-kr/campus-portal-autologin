@@ -82,8 +82,8 @@ For PCs running 24/7 without a browser window open, a companion Python watchdog 
 
 ## 🤝 Contributing
 
-Contributions, bug reports, and feature requests are welcome!
-Feel free to open an issue or submit a pull request on GitHub:
+Contributions, bug reports, and feature requests are welcome!  
+Please see our [Contributing Guide](CONTRIBUTING.md) for local development setup and guidelines.
 
 👉 **[https://github.com/rk-roshan-kr/campus-portal-autologin](https://github.com/rk-roshan-kr/campus-portal-autologin)**
 
